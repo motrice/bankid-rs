@@ -53,7 +53,7 @@ pub enum CardReader {
     class2
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CollectResponse {
     pub order_ref: String,
@@ -76,7 +76,7 @@ pub struct CollectRequestData {
     pub order_ref: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum HintCode {
     #[serde(rename = "outstandingTransaction")] pending_outstanding_transaction,
     #[serde(rename = "noClient")] pending_no_client,
@@ -90,7 +90,7 @@ pub enum HintCode {
     #[serde(other)] unknown
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum Status {
     Pending, 
@@ -109,7 +109,7 @@ impl std::fmt::Display for Status {
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CompletionData {
     pub user: UserData,
@@ -121,7 +121,7 @@ pub struct CompletionData {
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UserData {
     pub personal_number: String,
@@ -130,13 +130,13 @@ pub struct UserData {
     pub surname: String
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceData {
     pub ip_address: String
 } 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CertData {
     pub not_before: String,

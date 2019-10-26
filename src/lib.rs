@@ -5,18 +5,13 @@ extern crate image;
 extern crate base64;
 extern crate uuid;
 
+extern crate pretty_env_logger;
+#[macro_use] extern crate log;
+
 use qrcode::QrCode;
 use image::Luma;
 use image::png::PNGEncoder;
 use std::io::Write;
-
-use serde::Serialize;
-use serde::Deserialize;
-use uuid::Uuid;
-
-use reqwest::header;
-use std::fs::File;
-use std::io::Read;
 
 use tokio::timer::delay;
 use std::time::Duration;
@@ -37,8 +32,6 @@ pub async fn qr_code_png(uri: &str) -> Option<String> {
             let height = qr_image.height();
             let color_type = <image::Luma<u8> as image::Pixel>::COLOR_TYPE; // . image::ColorType::Gray(u8::max_value());
 
-            println!("width {} height {}", width, height);
-
             let mut png_buffer = Vec::new();
             //let s : String = qr_image;
 
@@ -49,15 +42,14 @@ pub async fn qr_code_png(uri: &str) -> Option<String> {
                     height,
                     color_type
                     ) {
-                        Ok(_) => println!("====> OK"),
-                        Err(err) => println!("====> ERROR {}", err)
+                        Ok(_) => info!("Created PNG with QRCode for {}", uri),
+                        Err(err) => error!("Failed to create PNG with QRCode for {}", err)
                     };
-            println!("generated image with width {} height {}", width, height);
 
             Some(base64::encode(&png_buffer))
         }
         Err(err) => {
-            println!("ERROR {}", err);
+            error!("Failed to create QRCode for {}: {}", uri, err);
             None
         }
     }
@@ -99,54 +91,32 @@ pub async fn collect(client: reqwest::Client, end_point: &str, order_ref: &str) 
     Ok(auth_res)
 }
 
-pub async fn poll_collect_until_completed(client: reqwest::Client, end_point: &str, order_ref: &str) -> Result<String> {
-    println!("poll until completed");
-    let mut count : u32 = 0;
-    let mut completed = false;
-    while !completed {
+pub async fn poll_collect_until_completed(client: reqwest::Client, end_point: &str, order_ref: &str) -> Result<domain::CollectResponse> { //Result<String> {
+    loop {
         let when = tokio::clock::now() + Duration::from_millis(2000);
-
         let poll_wait = delay(when).await;
-        let collect = collect(client.clone(), end_point, order_ref).await;
+        let collected  = collect(client.clone(), end_point, order_ref).await;
+        let req_res = (collected, poll_wait);
 
-        let req_res = (collect, poll_wait);
-
-        completed = match req_res.0 {
+        match req_res.0 {
             Ok(value) => {
-                println!("collecto {} {}", value.order_ref, value.status);
+                info!("BankID status for order {} is {}", value.order_ref, value.status);
                 match value.status {
                     domain::Status::Complete => {
-                        println!("Status is 'complete']'");
-                        true
+                        break Ok(value)
                     },
                     domain::Status::Pending => {
-                        println!("Status is 'pending']'");
-                        false
                     },
                     domain::Status::Failed => {
-                        println!("Status is 'failed']'");
-                        true
+                        break Ok(value)
                     }
                 }
             },
             Err(err) => {
-                println!("Error: {}", err);
-                false
+                error!("Error: {}", err);
             }
-        };
-
-        if completed {
-            println!("Klart!");
         }
-
-        if count>300 {
-            println!("Nä nu ger jag upp!");
-            completed = true;
-        }
-
-        count = count + 1;
     }
-    Ok(String::from("så"))
 }
 
 
