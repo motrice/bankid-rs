@@ -75,7 +75,7 @@ pub async fn auth(client: reqwest::Client, end_point: &str, personal_number: Opt
     Ok(auth_res)
 }
 
-pub async fn sign(client: reqwest::Client, end_point: &str, personal_number: Option<&str>, end_user_ip: &str, user_visible_data: &str, user_non_visible_data: &str) -> Result<domain::AuthSignResponse> {
+pub async fn sign(client: reqwest::Client, end_point: &str, personal_number: Option<&str>, end_user_ip: &str, user_visible_data: &str, user_non_visible_data: Option<&str>) -> Result<domain::AuthSignResponse> {
     let auth_req = domain::SignRequestData {
         personal_number: match personal_number {
             Some(s) => Some(String::from(s)),
@@ -84,7 +84,10 @@ pub async fn sign(client: reqwest::Client, end_point: &str, personal_number: Opt
         end_user_ip: String::from(end_user_ip),
         requirement: None,
         user_visible_data: String::from(user_visible_data),
-        user_non_visible_data: String::from(user_non_visible_data)
+        user_non_visible_data: match user_non_visible_data {
+            Some(s) => Some(String::from(s)),
+            None => None
+        }
     };
 
     let auth_res = client
