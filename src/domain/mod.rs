@@ -32,10 +32,13 @@ impl AuthRequestData {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignRequestData {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub personal_number: Option<String>,
     pub end_user_ip: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub requirement: Option<Requirement>,
     pub user_visible_data: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_non_visible_data: Option<String>
 }
 

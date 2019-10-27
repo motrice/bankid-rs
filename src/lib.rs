@@ -76,21 +76,26 @@ pub async fn auth(client: reqwest::Client, end_point: &str, personal_number: Opt
 }
 
 pub async fn sign(client: reqwest::Client, end_point: &str, personal_number: Option<String>, end_user_ip: &str, user_visible_data: &str, user_non_visible_data: Option<String>) -> Result<domain::AuthSignResponse> {
-    let auth_req = domain::SignRequestData {
+
+    let non_visible = match user_non_visible_data {
+        Some(s) => Some(base64::encode(&s)),
+        None => None
+    };
+    let sign_req = domain::SignRequestData {
         personal_number: match personal_number {
             Some(s) => Some(String::from(s)),
             None => None
         },
         end_user_ip: String::from(end_user_ip),
         requirement: None,
-        user_visible_data: String::from(user_visible_data),
-        user_non_visible_data: user_non_visible_data
+        user_visible_data: base64::encode(&user_visible_data),
+        user_non_visible_data: non_visible
     };
 
-    info!("sign req {}", auth_req.user_visible_data);
+    info!("sign req {}", sign_req.user_visible_data);
     let auth_res = client
         .post("https://appapi2.test.bankid.com/rp/v5/sign")
-        .json(&auth_req)
+        .json(&sign_req)
         .send()
         .await?
         .json().await?;
