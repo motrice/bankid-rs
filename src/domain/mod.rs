@@ -36,7 +36,7 @@ pub struct SignRequestData {
     pub end_user_ip: String,
     pub requirement: Option<Requirement>,
     pub user_visible_data: String,
-    pub user_non_visible_data: String
+    pub user_non_visible_data: Option<String>
 }
 
 #[derive(Serialize, Deserialize)]
