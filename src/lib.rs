@@ -75,6 +75,28 @@ pub async fn auth(client: reqwest::Client, end_point: &str, personal_number: Opt
     Ok(auth_res)
 }
 
+pub async fn sign(client: reqwest::Client, end_point: &str, personal_number: Option<&str>, end_user_ip: &str, user_visible_data: &str, user_non_visible_data: &str) -> Result<domain::AuthSignResponse> {
+    let auth_req = domain::SignRequestData {
+        personal_number: match personal_number {
+            Some(s) => Some(String::from(s)),
+            None => None
+        },
+        end_user_ip: String::from(end_user_ip),
+        requirement: None,
+        user_visible_data: String::from(user_visible_data),
+        user_non_visible_data: String::from(user_non_visible_data)
+    };
+
+    let auth_res = client
+        .post("https://appapi2.test.bankid.com/rp/v5/sign")
+        .json(&auth_req)
+        .send()
+        .await?
+        .json().await?;
+
+    Ok(auth_res)
+}
+
 
 pub async fn collect(client: reqwest::Client, end_point: &str, order_ref: &str) -> Result<domain::CollectResponse> {
     let collect_req = domain::CollectRequestData {
