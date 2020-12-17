@@ -13,7 +13,7 @@ use image::Luma;
 use image::png::PNGEncoder;
 use std::io::Write;
 
-use tokio::timer::delay;
+use tokio::time::delay_for;
 use std::time::Duration;
 
 pub mod domain;
@@ -121,8 +121,7 @@ pub async fn collect(client: reqwest::Client, end_point: &str, order_ref: &str) 
 
 pub async fn poll_collect_until_completed(client: reqwest::Client, end_point: &str, order_ref: &str) -> Result<domain::CollectResponse> { //Result<String> {
     loop {
-        let when = tokio::clock::now() + Duration::from_millis(2000);
-        let poll_wait = delay(when).await;
+        let poll_wait = delay_for(Duration::from_millis(2000)).await;
         let collected  = collect(client.clone(), end_point, order_ref).await;
         let req_res = (collected, poll_wait);
 
