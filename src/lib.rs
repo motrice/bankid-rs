@@ -10,7 +10,7 @@ extern crate pretty_env_logger;
 
 use qrcode::QrCode;
 use image::Luma;
-use image::png::PNGEncoder;
+use image::png::PngEncoder;
 use std::io::Write;
 
 use tokio::time::delay_for;
@@ -35,7 +35,7 @@ pub async fn qr_code_png(uri: &str) -> Option<String> {
             let mut png_buffer = Vec::new();
             //let s : String = qr_image;
 
-            match PNGEncoder::new(png_buffer.by_ref())
+            match PngEncoder::new(png_buffer.by_ref())
                 .encode(
                     &qr_image,
                     width,
@@ -108,7 +108,7 @@ pub async fn collect(client: reqwest::Client, end_point: &str, order_ref: &str) 
     let collect_req = domain::CollectRequestData {
         order_ref: String::from(order_ref)
     };
-    
+
     let auth_res = client
         .post("https://appapi2.test.bankid.com/rp/v5/collect")
         .json(&collect_req)

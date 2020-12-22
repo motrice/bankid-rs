@@ -20,7 +20,7 @@ pub struct AuthRequestData {
 
 impl AuthRequestData {
     pub fn new(end_user_ip:&str) -> AuthRequestData {
-        AuthRequestData{personal_number: None, end_user_ip: String::from(end_user_ip), requirement: Some(Requirement{card_reader: Some(CardReader::class2), certificatePolicies: vec![CertificatePolicy::bankid_on_file, CertificatePolicy::bankid_mobile], auto_start_token_required: Some(true), allow_fingerprint: None})}
+        AuthRequestData{personal_number: None, end_user_ip: String::from(end_user_ip), requirement: Some(Requirement{card_reader: Some(CardReader::Class2), certificate_policies: vec![CertificatePolicy::BankidOnFile, CertificatePolicy::BankidMobile], auto_start_token_required: Some(true), allow_fingerprint: None})}
     }
 
     pub fn new_with_personal_number(personal_number: String, end_user_ip: String) -> AuthRequestData {
@@ -52,8 +52,8 @@ pub struct AuthSignResponse {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum CardReader {
-    class1, // default value in BankID service
-    class2
+    #[serde(rename = "class1")] Class1, // default value in BankID service
+    #[serde(rename = "class2")] Class2
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -69,7 +69,22 @@ pub struct CollectResponse {
 
 impl std::fmt::Display for CollectResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "CollectResponse(order_ref: {} {})", self.order_ref, self.status)
+        write!(f, "CollectResponse(order_ref: {} {})", self.order_ref, self.status);
+        match &self.hint_code {
+            Some(hint_code) => match hint_code {
+                HintCode::PendingOutstandingTransaction => write!(f, " hint_code: PendingOutstandingTransaction"),
+                HintCode::PendingNoClient=> write!(f, " hint_code: PendingNoClient"),
+                HintCode::PendingStarted=> write!(f, " hint_code: PendingStarted"),
+                HintCode::PendingUserSign=> write!(f, " hint_code: PendingUserSign"),
+                HintCode::FailedExpiredTransaction=> write!(f, " hint_code: FailedExpiredTransaction"),
+                HintCode::FailedCertificateErr=> write!(f, " hint_code: FailedCertificateErr"),
+                HintCode::FailedUserCancel=> write!(f, " hint_code: FailedUserCancel"),
+                HintCode::FailedCancelled=> write!(f, " hint_code: FailedCancelled"),
+                HintCode::FailedStartFailed=> write!(f, " hint_code: FailedStartFailed"),
+                HintCode::Unknown=> write!(f, " hint_code: Unknown"),
+            },
+            None => write!(f, " hint_code: None"),
+        }
     }
 }
 
@@ -81,16 +96,16 @@ pub struct CollectRequestData {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum HintCode {
-    #[serde(rename = "outstandingTransaction")] pending_outstanding_transaction,
-    #[serde(rename = "noClient")] pending_no_client,
-    #[serde(rename = "started")] pending_started,
-    #[serde(rename = "userSign")] pending_user_sign,
-    #[serde(rename = "expiredTransaction")] failed_expired_transaction,
-    #[serde(rename = "certificateErr")] failed_certificate_err,
-    #[serde(rename = "userCancel")] failed_user_cancel,
-    #[serde(rename = "cancelled")] failed_cancelled,
-    #[serde(rename = "startFailed")] failed_start_failed,
-    #[serde(other)] unknown
+    #[serde(rename = "outstandingTransaction")] PendingOutstandingTransaction,
+    #[serde(rename = "noClient")] PendingNoClient,
+    #[serde(rename = "started")] PendingStarted,
+    #[serde(rename = "userSign")] PendingUserSign,
+    #[serde(rename = "expiredTransaction")] FailedExpiredTransaction,
+    #[serde(rename = "certificateErr")] FailedCertificateErr,
+    #[serde(rename = "userCancel")] FailedUserCancel,
+    #[serde(rename = "cancelled")] FailedCancelled,
+    #[serde(rename = "startFailed")] FailedStartFailed,
+    #[serde(other)] Unknown
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -150,24 +165,24 @@ pub struct CertData {
 #[serde(rename_all = "camelCase")]
 pub enum CertificatePolicy {
     // production values
-    #[serde(rename = "1.2.752.78.1.1")] bankid_on_file,
-    #[serde(rename = "1.2.752.78.1.2")] bankid_on_smart_card,
-    #[serde(rename = "1.2.752.78.1.5")] bankid_mobile,
-    #[serde(rename = "1.2.752.71.1.3")] nordea_eid_on_file_smart_card,
+    #[serde(rename = "1.2.752.78.1.1")] BankidOnFile,
+    #[serde(rename = "1.2.752.78.1.2")] BankidOnSmartCard,
+    #[serde(rename = "1.2.752.78.1.5")] BankidMobile,
+    #[serde(rename = "1.2.752.71.1.3")] NordeaEidOnFileSmartCard,
 
     // test values 
-    #[serde(rename = "1.2.3.4.5")] test_bankid_on_file,
-    #[serde(rename = "1.2.3.4.10")] test_bankid_on_smart_card,
-    #[serde(rename = "1.2.3.4.25")] test_bankid_mobile,
-    #[serde(rename = "1.2.752.71.1.3")] test_nordea_eid_on_file_smart_card,
-    #[serde(rename = "1.2.752.60.1.6")] test_bankid_for_some_bankid_banks
+    #[serde(rename = "1.2.3.4.5")] TestBankidOnFile,
+    #[serde(rename = "1.2.3.4.10")] TestBankidOnSmartCard,
+    #[serde(rename = "1.2.3.4.25")] TestBankidMobile,
+    #[serde(rename = "1.2.752.71.1.3")] TestNordeaEidOnFileSmartCard,
+    #[serde(rename = "1.2.752.60.1.6")] TestBankidForSomeBankidBanks
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Requirement {
     pub card_reader: Option<CardReader>,
-    pub certificatePolicies: Vec<CertificatePolicy>,
+    pub certificate_policies: Vec<CertificatePolicy>,
     // issuerCn is not implemented 
     //   from bankid spec: 
     //      if issuerCn is not defined allallow_fingerprint relevant BankID 
