@@ -69,22 +69,22 @@ pub struct CollectResponse {
 
 impl std::fmt::Display for CollectResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "CollectResponse(order_ref: {} {})", self.order_ref, self.status);
-        match &self.hint_code {
+        let hint_code = match &self.hint_code {
             Some(hint_code) => match hint_code {
-                HintCode::PendingOutstandingTransaction => write!(f, " hint_code: PendingOutstandingTransaction"),
-                HintCode::PendingNoClient=> write!(f, " hint_code: PendingNoClient"),
-                HintCode::PendingStarted=> write!(f, " hint_code: PendingStarted"),
-                HintCode::PendingUserSign=> write!(f, " hint_code: PendingUserSign"),
-                HintCode::FailedExpiredTransaction=> write!(f, " hint_code: FailedExpiredTransaction"),
-                HintCode::FailedCertificateErr=> write!(f, " hint_code: FailedCertificateErr"),
-                HintCode::FailedUserCancel=> write!(f, " hint_code: FailedUserCancel"),
-                HintCode::FailedCancelled=> write!(f, " hint_code: FailedCancelled"),
-                HintCode::FailedStartFailed=> write!(f, " hint_code: FailedStartFailed"),
-                HintCode::Unknown=> write!(f, " hint_code: Unknown"),
+                HintCode::PendingOutstandingTransaction => " hint_code: PendingOutstandingTransaction",
+                HintCode::PendingNoClient=> " hint_code: PendingNoClient",
+                HintCode::PendingStarted=> " hint_code: PendingStarted",
+                HintCode::PendingUserSign=> " hint_code: PendingUserSign",
+                HintCode::FailedExpiredTransaction=> " hint_code: FailedExpiredTransaction",
+                HintCode::FailedCertificateErr=> " hint_code: FailedCertificateErr",
+                HintCode::FailedUserCancel=> " hint_code: FailedUserCancel",
+                HintCode::FailedCancelled=> " hint_code: FailedCancelled",
+                HintCode::FailedStartFailed=> " hint_code: FailedStartFailed",
+                HintCode::Unknown=> " hint_code: Unknown",
             },
-            None => write!(f, " hint_code: None"),
-        }
+            None => " hint_code: None",
+        };
+        write!(f, "CollectResponse(order_ref: {} status: {} hint_code: {})", self.order_ref, self.status, hint_code)
     }
 }
 
@@ -111,7 +111,7 @@ pub enum HintCode {
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum Status {
-    Pending, 
+    Pending,
     Failed,
     Complete
 }
